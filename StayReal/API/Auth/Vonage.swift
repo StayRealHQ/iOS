@@ -30,9 +30,8 @@ struct CheckCodeRequest: Codable {
 }
 
 enum VonageError: Error {
-  case dataExchangeError(String)
-  case requestCodeError(String)
-  case checkCodeError(String)
+  case invalidResponse(String)
+  case incorrectCode(String)
 }
 
 struct VonageService {
@@ -51,7 +50,7 @@ struct VonageService {
     let (data, response) = try await URLSession.shared.data(for: request)
 
     guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-      throw VonageError.dataExchangeError(
+      throw VonageError.invalidResponse(
         "Not able to get data exchange for this phone number, please check the phone number and try again."
       )
     }
@@ -80,7 +79,7 @@ struct VonageService {
     let (data, response) = try await URLSession.shared.data(for: request)
     
     guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-      throw VonageError.requestCodeError(
+      throw VonageError.invalidResponse(
         "Not able to send SMS for this phone number, please check the phone number and try again."
       )
     }
@@ -100,17 +99,17 @@ struct VonageService {
       CheckCodeRequest(code: code, vonageRequestId: vonageRequestId)
     )
     
-    let (data, response) = try await URLSession.shared.data(for: request)
+    let (data, _) = try await URLSession.shared.data(for: request)
     let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
     
     // Allows to determine whetever the code is correct or not.
     let status = json?["status"] as? String
     
     if status == "16" {
-      throw VonageError.checkCodeError("Incorrect OTP code.")
+      throw VonageError.incorrectCode("Incorrect OTP code.")
     }
     else if status != "0" {
-      throw VonageError.checkCodeError("Not able to verify the code, please check the code and try again.")
+      throw VonageError.invalidResponse("Not able to verify the code, please check the code and try again.")
     }
     
     return json?["token"] as! String
