@@ -8,16 +8,25 @@
 import SwiftUI
 
 struct MainContainer: View {
+    @EnvironmentObject var keychain: Keychain
+    
     init() {
         SetupNavigationBarApparence()
     }
     
     var body: some View {
-        NavigationStack {
-            OnboardingView()
-                .background(Color.background)
+        if (keychain.loggedIn) {
+            NavigationStack() {
+                AccountsContainer()
+            }
+            .colorScheme(.dark)
+        } else {
+            NavigationStack() {
+                OnboardingView()
+                    .background(Color.background)
+            }
+            .colorScheme(.dark)
         }
-        .colorScheme(.dark)
     }
 }
 

@@ -21,7 +21,7 @@ struct OnboardingView:View {
             }
             .frame(height: 170)
             NavigationLink("Get started", destination: LoginView())
-            .buttonStyle(ProminentButtonStyle())
+                .buttonStyle(ProminentButtonStyle())
         }
         .padding()
     }
