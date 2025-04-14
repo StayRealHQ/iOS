@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		776943512D9EF1BC00E1564C /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 776943502D9EF1BC00E1564C /* PhoneNumberKit */; };
+		AD0AB5102DA9170A005FB678 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AD0AB50F2DA9170A005FB678 /* SwiftUIIntrospect */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				776943512D9EF1BC00E1564C /* PhoneNumberKit in Frameworks */,
+				AD0AB5102DA9170A005FB678 /* SwiftUIIntrospect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +87,7 @@
 			name = StayReal;
 			packageProductDependencies = (
 				776943502D9EF1BC00E1564C /* PhoneNumberKit */,
+				AD0AB50F2DA9170A005FB678 /* SwiftUIIntrospect */,
 			);
 			productName = StayReal;
 			productReference = 776943412D9EE5C300E1564C /* StayReal.app */;
@@ -116,6 +119,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				7769434F2D9EF1BB00E1564C /* XCRemoteSwiftPackageReference "PhoneNumberKit" */,
+				AD0AB50E2DA9170A005FB678 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 776943422D9EE5C300E1564C /* Products */;
@@ -365,6 +369,14 @@
 				minimumVersion = 4.0.2;
 			};
 		};
+		AD0AB50E2DA9170A005FB678 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -372,6 +384,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7769434F2D9EF1BB00E1564C /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;
 			productName = PhoneNumberKit;
+		};
+		AD0AB50F2DA9170A005FB678 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AD0AB50E2DA9170A005FB678 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
