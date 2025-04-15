@@ -4,7 +4,8 @@ import SwiftUI
 struct StayRealApp: App {
   var body: some Scene {
     WindowGroup {
-      LoginView()
+        MainContainer()
+            .environmentObject(Keychain.shared)
     }
   }
 }
