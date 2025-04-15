@@ -91,30 +91,11 @@ struct LoginView: View {
                             countryCode = phone.countryCode
                             phoneNumberPlaceHolder = PartialFormatter().formatPartial(PartialFormatter().nationalNumber(from: PhoneNumberUtility().getFormattedExampleNumber(forCountry: countryCode) ?? ""))
                         } label: {
-                            AsyncImage(url: URL(string: "https://flagsapi.com/\(phone.countryCode.uppercased())/flat/64.png")!)
-                            Text("\(phone.countryName) (+\(phone.code))")
+                            Text("\(phone.countryCode.flagEmoji) \(phone.countryName) (+\(phone.code))")
                         }
                     }
                 } label: {
-                    AsyncImage(url: URL(string: "https://flagsapi.com/\(countryCode.uppercased())/flat/64.png")!) { data in
-                        if let image = data.image {
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 40)
-                        }
-                    }
-                    .mask {
-                        RoundedRectangle(cornerRadius: 3)
-                            .opacity(0.9)
-                            .frame(width: 38, height: 26)
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 3)
-                            .stroke(.white.opacity(0.1), lineWidth: 1)
-                            .frame(width: 38, height: 26)
-                    }
-                    Text("+\(PhoneNumberUtility().countryCode(for: countryCode) ?? 1)")
+                    Text("\(countryCode.flagEmoji) +\(PhoneNumberUtility().countryCode(for: countryCode) ?? 1)")
                         .font(.largeTitle.bold())
                 }
                 AutoFocusTextField(
