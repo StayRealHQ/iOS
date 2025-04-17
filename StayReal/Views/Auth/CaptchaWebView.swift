@@ -1,21 +1,72 @@
 import SwiftUI
+import CryptoKit
 import WebKit
 
+func sha256(_ input: String) -> Data {
+    let data = Data(input.utf8)
+    let hash = SHA256.hash(data: data)
+    return Data(hash)
+}
+
+func bytesToHex(_ data: Data) -> String {
+    return data.map { String(format: "%02hhx", $0) }.joined()
+}
+
+func getBatteryState() -> String {
+    UIDevice.current.isBatteryMonitoringEnabled = true
+    var result: String = ""
+    switch UIDevice.current.batteryState {
+    case .unknown:
+        result = "Full"
+    case .unplugged:
+        result = "Unplugged"
+    case .charging:
+        result = "Charging"
+    case .full:
+        result = "Full"
+    @unknown default:
+        result = "Full"
+    }
+    return result
+}
+
+func getBatteryLevel() -> Int {
+    UIDevice.current.isBatteryMonitoringEnabled = true
+    let value = Int(UIDevice.current.batteryLevel * 100.0)
+    UIDevice.current.isBatteryMonitoringEnabled = false
+    return value
+}
+
+func getModelCode() -> String? {
+    let service = dlopen("/usr/lib/libMobileGestalt.dylib", RTLD_LAZY)
+    defer { dlclose(service) }
+    
+    typealias MGCopyAnswerFunc = @convention(c) (CFString) -> CFTypeRef?
+    guard let sym = dlsym(service, "MGCopyAnswer") else { return nil }
+    let MGCopyAnswer = unsafeBitCast(sym, to: MGCopyAnswerFunc.self)
+    
+    if let cfStr = MGCopyAnswer("ModelNumber" as CFString),
+       let modelNumber = cfStr as? String {
+        return modelNumber
+    }
+    return nil
+}
+
 struct CaptchaWebView: UIViewRepresentable {
-  private static let clientKey = "CCB0863E-D45D-42E9-A6C8-9E8544E8B17E"
-
-  private let content: String
-  private let callback: (String) -> Void
-
-  // Helper method to automatically escape strings for
-  // the JSON configuration of the captcha.
-  private static func escape(_ input: String) -> String {
-    let data = try! JSONSerialization.data(withJSONObject: [input])
-    let string = String(data: data, encoding: .utf8)!
-
-    // We have to remove surrounding brackets.
-    return String(string.dropFirst().dropLast())
-  }
+    private static let clientKey = "CCB0863E-D45D-42E9-A6C8-9E8544E8B17E"
+    
+    private let content: String
+    private let callback: (String) -> Void
+    
+    // Helper method to automatically escape strings for
+    // the JSON configuration of the captcha.
+    private static func escape(_ input: String) -> String {
+        let data = try! JSONSerialization.data(withJSONObject: [input])
+        let string = String(data: data, encoding: .utf8)!
+        
+        // We have to remove surrounding brackets.
+        return String(string.dropFirst().dropLast())
+    }
 
   init(deviceId: String, dataExchange: String, callback: @escaping (String) -> Void) {
     // Timestamp as of right now to generate the biometric motion data.
@@ -76,8 +127,8 @@ struct CaptchaWebView: UIViewRepresentable {
                     [p+"build_version"]: "2.4.0(2.4.0)",
                     [p+"product"]: "\(getDeviceIdentifier())",
                     [p+"device_orientation"]: "Un",
-                    [p+"battery_status"]: "Full",
-                    [p+"battery_capacity"]: 100,
+                    [p+"battery_status"]: "\(getBatteryState())",
+                    [p+"battery_capacity"]: \(getBatteryLevel()),
                     [p+"device"]: "\(getDeviceIdentifier())",
                     [p+"app_id"]: "\(bundleId)",
                     [p+"screen_width"]: \(Int(UIScreen.main.bounds.size.width)),
@@ -89,18 +140,20 @@ struct CaptchaWebView: UIViewRepresentable {
                     [p+"errors"]: "[mobile_sdk__app_signing_credential,Data collection is not from within an app on device]",
                     [p+"id_for_vendor"]: "\(deviceId)",
                     [p+"language"]: "en",
-                    [p+"screen_brightness"]: 34,
+                    [p+"screen_brightness"]: \(Int(UIScreen.main.brightness * 100)),
                     [p+"app_signing_credential"]: "",
                     [p+"locale_hash"]: "3fb3b71c66dc175f8770cf5e787ed1a5eab6754edb97683cd45aebe87ed366bd",
                     [p+"codec_hash"]: "4b65149a7879a1daa5fc5cab4f747d07130b77babd9ddffae4e6cf0f18299181",
-                    [p+"device_name"]: "\(sha256(UIDevice.current.name))",
+                    [p+"device_name"]: "\(bytesToHex(sha256(UIDevice.current.name)))",
                     [p+"cpu_cores"]: \(ProcessInfo.processInfo.processorCount),
-                    [p+"icloud_ubiquity_token"]: "",
+                    [p+"icloud_ubiquity_token"]: "\(bytesToHex(sha256(UUID().uuidString)))",
                     [p+"bio_fingerprint"]: 3,
                     [p+"gpu"]: "Apple,Apple GPU",
                     [p+"device_arch"]: "arm64e",
-                    [p+"model"]: "\(UIDevice.current.model)",
+                    [p+"model"]: "\(DeviceModel[getDeviceIdentifier()] ?? "A2846")",
                     [p+"kernel"]: \(CaptchaWebView.escape(getKernelVersion())),
+                    [p+"country_region"]:"US",
+                    [p+"timezone_offset"]:0,
                     [p+"biometric_orientation"]:"1;\(timestamp);0,0.00,-0.00,-0.00;26,30.00,-0.00,-0.00;78,30.00,-0.00,-0.00;138,30.00,-0.00,-0.00;312,30.00,-0.00,-0.00;376,30.00,-0.00,-0.00;434,30.00,-0.00,-0.00;534,30.00,-0.00,-0.00;643,30.00,-0.00,-0.00;747,30.00,-0.00,-0.00;834,30.00,-0.00,-0.00;934,30.00,-0.00,-0.00;1034,30.00,-0.00,-0.00;1135,30.00,-0.00,-0.00;1234,30.00,-0.00,-0.00;1334,30.00,-0.00,-0.00;1434,30.00,-0.00,-0.00;1534,30.00,-0.00,-0.00;1635,30.00,-0.00,-0.00;1739,30.00,-0.00,-0.00;1834,30.00,-0.00,-0.00;1935,30.00,-0.00,-0.00;2034,30.00,-0.00,-0.00;2135,30.00,-0.00,-0.00;2235,30.00,-0.00,-0.00;2334,30.00,-0.00,-0.00;2434,30.00,-0.00,-0.00;2535,30.00,-0.00,-0.00;2634,30.00,-0.00,-0.00;2735,30.00,-0.00,-0.00;2834,30.00,-0.00,-0.00;2935,30.00,-0.00,-0.00;3035,30.00,-0.00,-0.00;3135,30.00,-0.00,-0.00;3234,30.00,-0.00,-0.00;3334,30.00,-0.00,-0.00;3435,30.00,-0.00,-0.00;3535,30.00,-0.00,-0.00;3634,30.00,-0.00,-0.00;3735,30.00,-0.00,-0.00;3834,30.00,-0.00,-0.00;3935,30.00,-0.00,-0.00;4035,30.00,-0.00,-0.00;4135,30.00,-0.00,-0.00;4235,30.00,-0.00,-0.00;4334,30.00,-0.00,-0.00;4435,30.00,-0.00,-0.00;4724,30.00,-0.00,-0.00;4726,30.00,-0.00,-0.00;4737,30.00,-0.00,-0.00;",
                     [p+"biometric_motion"]:"1;\(timestamp);0,0.00,0.00,0.00,0.00,0.00,-9.81,0.00,0.00,0.00;26,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,286.33,-76.72;78,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;138,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;312,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;376,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;434,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;534,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;643,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;747,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;834,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;934,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1034,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1135,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1234,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1334,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1434,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1534,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1635,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1739,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1834,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;1935,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2034,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2135,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2235,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2334,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2434,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2535,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2634,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2735,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2834,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;2935,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3035,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3135,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3234,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3334,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3435,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3535,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3634,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3735,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3834,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;3935,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4035,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4135,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4235,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4334,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4435,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4724,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4726,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;4737,0.00,0.00,0.00,0.00,-4.91,-8.50,0.00,0.00,0.00;"
                   })))
@@ -112,6 +165,7 @@ struct CaptchaWebView: UIViewRepresentable {
         <body id="challenge"></body>
         </html>
       """
+      print(self.content)
   }
 
   class Coordinator: NSObject, WKScriptMessageHandler {
