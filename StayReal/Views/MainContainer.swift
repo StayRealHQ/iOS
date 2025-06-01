@@ -32,4 +32,6 @@ struct MainContainer: View {
 
 #Preview {
     MainContainer()
+        .environmentObject(Keychain.shared)
 }
+

@@ -53,3 +53,11 @@ struct PersonInterface_Me: Decodable {
     let isPrivate: Bool
     let accountDeleteScheduledAt: String?
 }
+
+struct User: Decodable, Identifiable {
+    let id: String
+    let username: String
+    let fullname: String?
+    let profilePicture: Media?
+    let type: String
+}

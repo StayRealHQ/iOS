@@ -7,13 +7,6 @@
 
 import Foundation
 
-enum PersonError: Error {
-    case noAccessTokenInKeychain
-    case noDeviceIdInKeychain
-    case invalidConversionToData
-    case userNotFound
-}
-
 struct Person {
     private let baseURL = "https://mobile-l7.bereal.com/api/person"
     
@@ -21,10 +14,10 @@ struct Person {
         
         // Get the access token and device id from the Keychain
         guard let accessToken = Keychain.shared.getAccessToken() else {
-            throw PersonError.noAccessTokenInKeychain
+            throw StayRealError.noAccessTokenInKeychain
         }
         guard let deviceId = Keychain.shared.getDeviceID() else {
-            throw PersonError.noDeviceIdInKeychain
+            throw StayRealError.noDeviceIdInKeychain
         }
         
         // Create the request
@@ -47,11 +40,11 @@ struct Person {
             
             // Error : User not exist (yes, really)
             if (httpResponse.statusCode == 404) {
-                throw PersonError.userNotFound
+                throw StayRealError.userNotFound
             }
             
             return try JSONDecoder().decode(PersonInterface_Me.self, from: data)
         }
-        throw PersonError.invalidConversionToData
+        throw StayRealError.invalidConversionToData
     }
 }
