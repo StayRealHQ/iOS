@@ -9,4 +9,7 @@ struct Media: Decodable {
     let url: String
     let width: Int
     let height: Int
+    
+    let mediaType: String?
+    let mimeType: String?
 }

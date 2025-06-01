@@ -1,6 +1,24 @@
 {
-  "originHash" : "54ea6f34089a56a31933cdf393100753c78afc2b229b8acf67d83a7d0f24ed46",
+  "originHash" : "b1f9bfbe147f3ccc7145e9a0482e0d56f25199bb3955a4c1ab55d792eba07e4d",
   "pins" : [
+    {
+      "identity" : "cachedasyncimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bullinnyc/CachedAsyncImage.git",
+      "state" : {
+        "revision" : "cb253e111528c082381af54b67dab7a15eefde16",
+        "version" : "2.6.0"
+      }
+    },
+    {
+      "identity" : "lucide-icons-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JakubMazur/lucide-icons-swift.git",
+      "state" : {
+        "revision" : "25212e2c0c2e816f7a955ecb7ca54462b232c355",
+        "version" : "0.488.0"
+      }
+    },
     {
       "identity" : "phonenumberkit",
       "kind" : "remoteSourceControl",
@@ -17,6 +35,15 @@
       "state" : {
         "revision" : "807f73ce09a9b9723f12385e592b4e0aaebd3336",
         "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swiftuix?tab=readme-ov-file#contents",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftUIX/SwiftUIX?tab=readme-ov-file#contents",
+      "state" : {
+        "revision" : "e984fd2e08140ad5a95d084be38fe02b774bc15d",
+        "version" : "0.2.3"
       }
     }
   ],
